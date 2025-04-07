@@ -1,0 +1,174 @@
+@import "https://js.arcgis.com/4.31/@arcgis/core/assets/esri/themes/light/main.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+#root,
+html,
+body {
+  margin: 0;
+}
+
+@font-face {
+  font-family: "Kamerik";
+  src: url("./fonts/Kamerik205Heavy.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+arcgis-map {
+  display: block;
+  height: 100vh;
+}
+#viewDiv:focus {
+  outline: none !important;
+}
+.calcite-zoom {
+  display: none !important;
+}
+
+.custom-scale-bar {
+  background-color: white !important;
+  border-radius: 5px;
+  padding: 5px;
+  font-size: 12px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Optional shadow */
+  position: absolute;
+  bottom: 50px;
+  right: 20px;
+}
+
+.esri-scale-bar {
+  background-color: white !important;
+  border-radius: 5px;
+  padding: 5px;
+  font-size: 12px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.scale-selector {
+  position: absolute;
+  bottom: 50px;
+  right: 20px;
+}
+
+select {
+  padding: 5px;
+  font-size: 14px;
+}
+
+.esri-scale-bar {
+  background-color: transparent !important;
+}
+
+.esri-scale-bar__bar-container {
+  background-color: #3645b2 !important;
+  opacity: 1 !important;
+  padding: 0.25rem 0 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.esri-scale-bar__line--top {
+  border: none !important;
+}
+
+.esri-scale-bar__line {
+  background-color: #3645b2 !important;
+  padding: 0.25rem 0 !important;
+  place-items: center !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.esri-scale-bar__label {
+  color: #ffe100 !important;
+  font-size: 0.85rem;
+  font-weight: 200;
+}
+
+.esri-scale-bar__label-container--top {
+  bottom: 4px !important;
+}
+
+#viewDiv {
+  outline: none !important;
+}
+
+.esri-view {
+  outline: none !important;
+}
+.loading-screen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f0f0f0;
+}
+
+.staircase {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.step {
+  width: 50px;
+  height: 50px;
+  background-color: #4caf50;
+  border-radius: 5px;
+}
+
+.content {
+  font-size: 24px;
+  color: #333;
+}
+
+.stairs {
+  .transition-container {
+    position: fixed;
+
+    width: 100vw;
+
+    height: 100vh;
+
+    display: flex;
+
+    left: 0;
+
+    top: 0;
+
+    pointer-events: none;
+
+    z-index: 2;
+
+    div {
+      position: relative;
+
+      height: 100%;
+
+      width: 100%;
+
+      background-color: #3645b2;
+    }
+  }
+
+  .transition-background {
+    position: fixed;
+
+    width: 100%;
+
+    height: 100vh;
+
+    background-color: #3645b2;
+
+    z-index: 1;
+
+    pointer-events: none;
+
+    top: 0;
+
+    left: 0;
+  }
+}

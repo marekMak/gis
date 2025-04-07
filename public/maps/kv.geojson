@@ -1,0 +1,38 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [17.0776, 48.1582]
+      },
+      "properties": {
+        "name": "Karlova Ves - Centrum",
+        "description": "Hlavná ulica v Karlovej Vsi."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [17.065, 48.16]
+      },
+      "properties": {
+        "name": "Karlova Ves - Záhorská",
+        "description": "Západná časť Karlovej Vsi."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [17.087, 48.159]
+      },
+      "properties": {
+        "name": "Karlova Ves - Družba",
+        "description": "Oblasť s rodinnými domami."
+      }
+    }
+  ]
+}
