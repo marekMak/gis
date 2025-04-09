@@ -7,7 +7,7 @@ const Logo = () => {
         <img
           src={logoKV}
           alt="logo Karlova Ves"
-          className="size-10 absolute bottom-10 left-4 shadow"
+          className="size-10 absolute bottom-16 lg:bottom-10 left-2 lg:left-4 shadow"
         />
       </a>
     </>

@@ -4,6 +4,7 @@ import MapView from "@arcgis/core/views/MapView";
 import esriConfig from "@arcgis/core/config.js";
 import ScaleBar from "@arcgis/core/widgets/ScaleBar";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
+import TileLayer from "@arcgis/core/layers/TileLayer";
 
 import ScaleSelector from "./ScaleSelector";
 import HomeButton from "./HomeButton";
@@ -13,20 +14,6 @@ import Printer from "./Printer";
 import ZoomButtons from "./ZoomButtons";
 import Copyright from "./Copyright";
 import Logo from "./Logo";
-
-const layerConfigs = {
-  doprava: {
-    parkovanie:
-      "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/adresy/FeatureServer",
-    zimnaUdrzba:
-      "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/katastralneUzemie/FeatureServer",
-  },
-  zelen: {
-    parky:
-      "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/obvodyNew/FeatureServer",
-    lesy: "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/vrstevnice/FeatureServer",
-  },
-};
 
 const MyMap = () => {
   const [view, setView] = useState(null);
@@ -97,6 +84,21 @@ const MyMap = () => {
     }
   };
 
+  const toggleTileLayer = (url) => {
+    if (!view) return;
+
+    const existingLayer = activeLayers.find((layer) => layer.url === url);
+
+    if (existingLayer) {
+      view.map.remove(existingLayer);
+      setActiveLayers((prev) => prev.filter((layer) => layer.url !== url));
+    } else {
+      const tileLayer = new TileLayer({ url });
+      view.map.add(tileLayer);
+      setActiveLayers((prev) => [...prev, tileLayer]);
+    }
+  };
+
   return (
     <div
       id="viewDiv"
@@ -106,9 +108,10 @@ const MyMap = () => {
       <Header
         className="absolute left-1/2 -translate-x-[50%]"
         toggleLayer={toggleLayer}
+        toggleTileLayer={toggleTileLayer}
       ></Header>
       <ZoomButtons view={view}></ZoomButtons>
-      <div className="absolute bottom-10 right-6 flex items-center items-stretch gap-0.5">
+      <div className="absolute bottom-16 lg:bottom-10 right-2 lg:right-6 flex items-center items-stretch gap-0.5">
         <ScaleSelector view={view}></ScaleSelector>
         <Printer view={view}></Printer>
         <HomeButton view={view}></HomeButton>

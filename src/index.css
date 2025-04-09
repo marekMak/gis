@@ -60,6 +60,7 @@ select {
 
 .esri-scale-bar {
   background-color: transparent !important;
+  max-width: 100px !important;
 }
 
 .esri-scale-bar__bar-container {

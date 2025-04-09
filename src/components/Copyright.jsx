@@ -5,10 +5,7 @@ const Copyright = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleModal = () => {
-    setIsModalOpen(!isModalOpen);
-    document.getElementById("sideBar").style.width = "100%";
-    document.getElementById("sideNav").style.width = "60%";
-    console.log(isModalOpen);
+    setIsModalOpen(true);
   };
   return (
     <>
@@ -18,10 +15,11 @@ const Copyright = () => {
       >
         <FaCopyright />
       </button>
-      {isModalOpen && (
-        <div className="modal fixed top-0 left-0 w-full h-full flex items-center justify-end bg-black bg-opacity-50">
-          <div className="copyright-modal bg-baseBlue shadow-2xl px-10 py-2 h-full flex items-center  relative">
-            <ul className="text-sm text-white">
+
+      {isModalOpen ? (
+        <div className="fixed top-0 left-0 w-full h-full flex items-center justify-end bg-black bg-opacity-50 z-[100]">
+          <div className="bg-baseBlue shadow-2xl  px-2 lg:px-10 py-2 h-full flex items-center  relative overflow-auto max-h-screen">
+            <ul className="text-xs lg:text-sm space-y-2 text-white">
               <li>
                 <span className="">Adresy</span> © Bratislavský samosprávny kraj
                 podla zmluvy č. 026 041 0112
@@ -162,6 +160,8 @@ const Copyright = () => {
             />
           </div>
         </div>
+      ) : (
+        <div className="hidden"></div>
       )}
     </>
   );

@@ -5,7 +5,7 @@ export const expand: any = {
   enter: (i: number) => ({
     top: "100vh",
     transition: {
-      duration: 0.8,
+      duration: 1.1,
       delay: 0.05 * i,
       ease: [0.215, 0.61, 0.355, 1],
     },
@@ -14,7 +14,7 @@ export const expand: any = {
   exit: (i: number) => ({
     height: "100vh",
     transition: {
-      duration: 0.8,
+      duration: 2,
       delay: 5 + 0.05 * i,
       ease: [0.215, 0.61, 0.355, 1],
     },
@@ -29,6 +29,6 @@ export const opacity: any = {
   },
   exit: {
     opacity: 0.5,
-    transition: { duration: 2 },
+    transition: { duration: 2.5 },
   },
 };
