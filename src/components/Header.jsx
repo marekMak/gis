@@ -6,9 +6,9 @@ import CustomContent from "@arcgis/core/popup/content/CustomContent";
 import TextContent from "@arcgis/core/popup/content/TextContent";
 import SimpleFillSymbol from "@arcgis/core/symbols/SimpleFillSymbol";
 import SimpleLineSymbol from "@arcgis/core/symbols/SimpleLineSymbol";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Loader } from "lucide-react";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 
 const layerSymbols = {
   test: {
@@ -304,10 +304,27 @@ const popupTemplate = {
     title: "Schody",
     content: "<b>Id:</b> {id}",
   },
+  // pamiatky: {
+  //   title: "Pamiatky",
+  //   content:
+  //     "<b>Id:</b> {id}<br><b>Adresa:</b> {adresa}<br><b>Názov:</b> {názov}<br><b>GPS:</b> {gps}",
+  // },
   pamiatky: {
     title: "Pamiatky",
-    content:
-      "<b>Id:</b> {id}<br><b>Adresa:</b> {adresa}<br><b>Názov:</b> {názov}<br><b>GPS:</b> {gps}",
+    outFields: ["id", "adresa", "názov, gps"], // Pridaj potrebné polia
+    content: [
+      // Definujeme HTML obsah pre text
+      new TextContent({
+        text: `<b>Id:</b> {id}<br><b>Adresa:</b> {adresa}<br><b>Názov:</b> {názov}<br><b>GPS:</b> {gps}
+        `,
+      }),
+
+      // Tu môžeš pridať AttachmentsContent pre zobrazenie príloh, ak je to potrebné
+      new AttachmentsContent({
+        displayType: "list",
+        orderByFields: [{ field: "ATT_NAME", order: "descending" }],
+      }),
+    ],
   },
   adresy: {
     title: "Adresy",
@@ -389,9 +406,12 @@ const toggleTileLayer = (url) => {
 const Header = ({ toggleLayer, toggleTileLayer }) => {
   const [activeLayer, setActiveLayer] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const toggleMenu = () => {
-    setMenuOpen(true);
+    startTransition(() => {
+      setMenuOpen(true);
+    });
   };
 
   const handleLayerToggle = (url, symbol) => {
@@ -439,7 +459,11 @@ const Header = ({ toggleLayer, toggleTileLayer }) => {
                     )
                   }
                 >
-                  Parkovanie pre fyzické osoby
+                  {isPending ? (
+                    <FaSpinner className="animate-spin mr-2" />
+                  ) : (
+                    "Parkovanie pre fyzické osoby"
+                  )}
                 </a>
               </li>
               <li>
@@ -787,8 +811,8 @@ const Header = ({ toggleLayer, toggleTileLayer }) => {
                   className={`block text-md hover:text-yellow-400 text-bold ${
                     activeLayer ===
                     "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/budovy/FeatureServer"
-                      ? "text-yellow-400 font-bold"
-                      : "text-white font-bold"
+                      ? "text-yellow-400"
+                      : "text-white"
                   }`}
                   onClick={() =>
                     toggleLayer(
@@ -929,6 +953,24 @@ const Header = ({ toggleLayer, toggleTileLayer }) => {
                   Odtokový model
                 </a>
               </li>
+              <li>
+                <a
+                  href="#"
+                  className={`block text-md hover:text-yellow-400 ${
+                    activeLayer ===
+                    "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/odtokovy_model_tiled/MapServer"
+                      ? "text-yellow-400 font-bold"
+                      : "text-white"
+                  }`}
+                  onClick={() =>
+                    toggleTileLayer(
+                      "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/odtokovy_model_tiled/MapServer"
+                    )
+                  }
+                >
+                  Odtokový model
+                </a>
+              </li>
             </ul>
           </li>
           <li className="text-center">
@@ -968,7 +1010,7 @@ const Header = ({ toggleLayer, toggleTileLayer }) => {
           </h1>
           <ul className="menu flex flex-col items-center w-full space-y-2">
             <li>
-              <details open>
+              <details closed>
                 <summary className="text-white text-md font-semibold hover:text-yellow-400">
                   Doprava
                 </summary>
@@ -985,12 +1027,16 @@ const Header = ({ toggleLayer, toggleTileLayer }) => {
                     onClick={() =>
                       toggleLayer(
                         "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/parkovanie/FeatureServer",
-                        layerSymbols["test"],
+                        layerSymbols["parking"],
                         popupTemplate["parkovanie"]
                       )
                     }
                   >
-                    Parkovanie
+                    {isPending ? (
+                      <FaSpinner className="animate-spin mr-2" />
+                    ) : (
+                      "Parkovanie pre fyzické osoby"
+                    )}
                   </a>
                 </li>
                 <li>
@@ -1005,7 +1051,7 @@ const Header = ({ toggleLayer, toggleTileLayer }) => {
                     onClick={() =>
                       toggleLayer(
                         "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/parkovanieZTP/FeatureServer",
-                        layerSymbols["test"],
+                        layerSymbols["parkingWheelchair"],
                         popupTemplate["parkovanieZŤP"]
                       )
                     }
@@ -1013,11 +1059,31 @@ const Header = ({ toggleLayer, toggleTileLayer }) => {
                     Parkovacie miesta ZŤP
                   </a>
                 </li>
+                <li>
+                  <a
+                    href="#"
+                    className={`block text-md hover:text-yellow-400 ${
+                      activeLayer ===
+                      "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/dopravneObmedzenia/FeatureServer"
+                        ? "text-yellow-400 font-bold"
+                        : "text-white"
+                    }`}
+                    onClick={() =>
+                      toggleLayer(
+                        "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/dopravneObmedzenia/FeatureServer",
+                        layerSymbols["obmedzenia"],
+                        popupTemplate["obmedzenia"]
+                      )
+                    }
+                  >
+                    Dopravné obmedzenia
+                  </a>
+                </li>
               </details>
             </li>
 
             <li>
-              <details open>
+              <details closed>
                 <summary className="text-white text-md font-semibold hover:text-yellow-400">
                   Zeleň
                 </summary>
@@ -1065,27 +1131,29 @@ const Header = ({ toggleLayer, toggleTileLayer }) => {
               </details>
             </li>
 
-            <li className="relative group py-2 flex-1 text-center">
-              <a
-                href="#"
-                className="text-white text-md font-semibold hover:text-yellow-400"
-              >
-                Infraštruktúra
-              </a>
-              <ul className="absolute -left-2 mt-2 space-y-2 bg-baseBlue text-white py-2 px-4 rounded-md shadow-lg hidden group-hover:block">
+            <li>
+              <details closed>
+                <summary className="text-white text-md font-semibold hover:text-yellow-400">
+                  Infraštruktúra
+                </summary>
                 <li>
                   <a
                     href="#"
-                    className="block text-md hover:text-yellow-400"
+                    className={`block text-md hover:text-yellow-400 ${
+                      activeLayer ===
+                      "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/pieskoviska/FeatureServer"
+                        ? "text-yellow-400 font-bold"
+                        : "text-white"
+                    }`}
                     onClick={() =>
                       toggleLayer(
-                        "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/Fontany/FeatureServer",
-                        layerSymbols["fontany"],
-                        popupTemplate["fontany"]
+                        "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/pieskoviska/FeatureServer",
+                        layerSymbols["ihriska"],
+                        popupTemplate["ihriska"]
                       )
                     }
                   >
-                    Fontány
+                    Detské ihriská
                   </a>
                 </li>
                 <li>
@@ -1108,7 +1176,190 @@ const Header = ({ toggleLayer, toggleTileLayer }) => {
                     Tieniace plachty
                   </a>
                 </li>
-              </ul>
+                <li>
+                  <a
+                    href="#"
+                    className={`block text-md hover:text-yellow-400 ${
+                      activeLayer ===
+                      "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/schody/FeatureServer"
+                        ? "text-yellow-400 font-bold"
+                        : "text-white"
+                    }`}
+                    onClick={() =>
+                      toggleLayer(
+                        "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/schody/FeatureServer",
+                        layerSymbols["schody"],
+                        popupTemplate["schody"]
+                      )
+                    }
+                  >
+                    Schody
+                  </a>
+                </li>
+              </details>
+            </li>
+
+            <li>
+              <details closed>
+                <summary className="text-white text-md font-semibold hover:text-yellow-400">
+                  Občianska vybavenosť
+                </summary>
+                <li>
+                  <a
+                    href="#"
+                    className="block text-md hover:text-yellow-400"
+                    onClick={() =>
+                      toggleLayer(
+                        "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/Fontany/FeatureServer",
+                        layerSymbols["fontany"],
+                        popupTemplate["fontany"]
+                      )
+                    }
+                  >
+                    Fontány
+                  </a>
+                </li>
+                <li className="text-center">
+                  <a
+                    href="#"
+                    className={`block text-md hover:text-yellow-400 ${
+                      activeLayer ===
+                      "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/lavicky/FeatureServer"
+                        ? "text-yellow-400"
+                        : "text-white"
+                    }`}
+                    onClick={() =>
+                      toggleLayer(
+                        "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/lavicky/FeatureServer",
+                        layerSymbols["lavicky"],
+                        popupTemplate["lavicky"]
+                      )
+                    }
+                  >
+                    Lavičky
+                  </a>
+                </li>
+                <li className="text-center">
+                  <a
+                    href="#"
+                    className={`block text-md hover:text-yellow-400 ${
+                      activeLayer ===
+                      "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/malekose/FeatureServer"
+                        ? "text-yellow-400"
+                        : "text-white"
+                    }`}
+                    onClick={() =>
+                      toggleLayer(
+                        "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/malekose/FeatureServer",
+                        layerSymbols["malekose"],
+                        popupTemplate["malekose"]
+                      )
+                    }
+                  >
+                    Malé koše
+                  </a>
+                </li>
+                <li className="text-center">
+                  <a
+                    href="#"
+                    className={`block text-md hover:text-yellow-400 ${
+                      activeLayer ===
+                      "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/velkekose/FeatureServer"
+                        ? "text-yellow-400"
+                        : "text-white"
+                    }`}
+                    onClick={() =>
+                      toggleLayer(
+                        "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/velkekose/FeatureServer",
+                        layerSymbols["velkekose"],
+                        popupTemplate["velkekose"]
+                      )
+                    }
+                  >
+                    Veľké koše
+                  </a>
+                </li>
+                <li className="text-center">
+                  <a
+                    href="#"
+                    className={`block text-md hover:text-yellow-400 ${
+                      activeLayer ===
+                      "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/psiekose/FeatureServer"
+                        ? "text-yellow-400"
+                        : "text-white"
+                    }`}
+                    onClick={() =>
+                      toggleLayer(
+                        "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/psiekose/FeatureServer",
+                        layerSymbols["psiekose"],
+                        popupTemplate["psiekose"]
+                      )
+                    }
+                  >
+                    Koše na psie exkrementy
+                  </a>
+                </li>
+                <li className="text-center">
+                  <a
+                    href="#"
+                    className={`block text-md hover:text-yellow-400 ${
+                      activeLayer ===
+                      "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/stojiska/FeatureServer"
+                        ? "text-yellow-400"
+                        : "text-white"
+                    }`}
+                    onClick={() =>
+                      toggleLayer(
+                        "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/stojiska/FeatureServer",
+                        layerSymbols["stojiska"],
+                        popupTemplate["stojiska"]
+                      )
+                    }
+                  >
+                    Kontajnerové stojiská
+                  </a>
+                </li>
+                <li className="text-center">
+                  <a
+                    href="#"
+                    className={`block text-md hover:text-yellow-400 text-bold ${
+                      activeLayer ===
+                      "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/komunitna/FeatureServer"
+                        ? "text-yellow-400 font-bold"
+                        : "text-white"
+                    }`}
+                    onClick={() =>
+                      toggleLayer(
+                        "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/komunitna/FeatureServer",
+                        layerSymbols["komunitna"],
+                        popupTemplate["komunitna"]
+                      )
+                    }
+                  >
+                    Komunitná záhrada
+                  </a>
+                </li>
+                <li className="text-center">
+                  <a
+                    href="#"
+                    className={`block text-md hover:text-yellow-400 text-bold ${
+                      activeLayer ===
+                      "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/vencovisko/FeatureServer"
+                        ? "text-yellow-400 font-bold"
+                        : "text-white"
+                    }`}
+                    onClick={() =>
+                      toggleLayer(
+                        "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/vencovisko/FeatureServer",
+                        layerSymbols["vencovisko"],
+                        popupTemplate["vencovisko"]
+                      )
+                    }
+                  >
+                    Venčovisko
+                  </a>
+                </li>
+              </details>
             </li>
 
             <li className="text-center">
@@ -1127,14 +1378,11 @@ const Header = ({ toggleLayer, toggleTileLayer }) => {
               </a>
             </li>
 
-            <li className="relative group py-2 flex-1 text-center">
-              <a
-                href="#"
-                className="text-white text-md font-semibold hover:text-yellow-400"
-              >
-                Orientácia
-              </a>
-              <ul className="absolute -left-2 mt-2 space-y-2 bg-baseBlue text-white py-2 px-4 rounded-md shadow-lg hidden group-hover:block">
+            <li>
+              <details closed>
+                <summary className="text-white text-md font-semibold hover:text-yellow-400">
+                  Orientácia
+                </summary>
                 <li>
                   <a
                     href="#"
@@ -1142,12 +1390,32 @@ const Header = ({ toggleLayer, toggleTileLayer }) => {
                     onClick={() =>
                       toggleLayer(
                         "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/adresy/FeatureServer",
-                        layerSymbols["pamiatky"],
+                        layerSymbols["adresy"],
                         popupTemplate["adresy"]
                       )
                     }
                   >
                     Adresy
+                  </a>
+                </li>
+                <li className="text-center">
+                  <a
+                    href="#"
+                    className={`block text-md hover:text-yellow-400 text-bold ${
+                      activeLayer ===
+                      "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/budovy/FeatureServer"
+                        ? "text-yellow-400"
+                        : "text-white"
+                    }`}
+                    onClick={() =>
+                      toggleLayer(
+                        "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/budovy/FeatureServer",
+                        layerSymbols["budovy"],
+                        popupTemplate["budovy"]
+                      )
+                    }
+                  >
+                    Budovy
                   </a>
                 </li>
                 <li>
@@ -1165,6 +1433,26 @@ const Header = ({ toggleLayer, toggleTileLayer }) => {
                     Vrstevnice
                   </a>
                 </li>
+                <li className="text-center">
+                  <a
+                    href="#"
+                    className={`block text-md hover:text-yellow-400 ${
+                      activeLayer ===
+                      "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/koty/FeatureServer"
+                        ? "text-yellow-400"
+                        : "text-white"
+                    }`}
+                    onClick={() =>
+                      toggleLayer(
+                        "https://services6.arcgis.com/CbTtVUhOyFMCoKPU/arcgis/rest/services/koty/FeatureServer",
+                        layerSymbols["koty"],
+                        popupTemplate["koty"]
+                      )
+                    }
+                  >
+                    Výškové kóty
+                  </a>
+                </li>
                 <li>
                   <a
                     href="#"
@@ -1180,14 +1468,14 @@ const Header = ({ toggleLayer, toggleTileLayer }) => {
                     Katastrálne územie
                   </a>
                 </li>
-              </ul>
+              </details>
             </li>
 
-            <li className="relative group py-2 flex-1 text-center">
-              <div className="text-white text-md font-semibold hover:text-yellow-400">
-                Školstvo
-              </div>
-              <ul className="absolute -left-2 mt-2 space-y-2 bg-baseBlue text-white py-2 px-4 rounded-md shadow-lg hidden group-hover:block">
+            <li>
+              <details closed>
+                <summary className="text-white text-md font-semibold hover:text-yellow-400">
+                  Školstvo
+                </summary>
                 <li>
                   <a
                     href="#"
@@ -1208,9 +1496,8 @@ const Header = ({ toggleLayer, toggleTileLayer }) => {
                     Školské obvody
                   </a>
                 </li>
-              </ul>
+              </details>
             </li>
-
             <li className="text-center">
               <a
                 href="#"
@@ -1220,6 +1507,11 @@ const Header = ({ toggleLayer, toggleTileLayer }) => {
               </a>
             </li>
           </ul>
+          {isPending && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-600 bg-opacity-50 z-50">
+              <Loader className="animate-spin text-white text-4xl" />
+            </div>
+          )}
         </div>
       ) : (
         <div className="hidden"></div>

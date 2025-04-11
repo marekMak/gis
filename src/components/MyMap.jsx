@@ -14,10 +14,12 @@ import Printer from "./Printer";
 import ZoomButtons from "./ZoomButtons";
 import Copyright from "./Copyright";
 import Logo from "./Logo";
+import { Loader } from "lucide-react";
 
 const MyMap = () => {
   const [view, setView] = useState(null);
   const [activeLayers, setActiveLayers] = useState([]);
+  const [isPending, setIsPending] = useState(false);
 
   useEffect(() => {
     esriConfig.apiKey = import.meta.env.VITE_ESRI_GIS_API;
@@ -62,13 +64,15 @@ const MyMap = () => {
   }, []);
 
   const toggleLayer = (layerUrl, layerSymbol, popupTemplate) => {
-    if (!view) return;
-
+    setIsPending(true); // Pred začiatkom načítania nastavíme isPending na true
     const existingLayer = activeLayers.find((layer) => layer.url === layerUrl);
+
+    if (!view) return;
 
     if (existingLayer) {
       view.map.remove(existingLayer);
       setActiveLayers((prev) => prev.filter((layer) => layer.url !== layerUrl));
+      setIsPending(false); // Ak je vrstva už odstránená, animácia skončí
     } else {
       const newLayer = new FeatureLayer({
         url: layerUrl,
@@ -79,12 +83,19 @@ const MyMap = () => {
           enabled: true, // Povoliť cache pre rýchlejšie načítanie
         },
       });
+
+      // Skontrolujeme stav načítania vrstvy
+      newLayer.when(() => {
+        setIsPending(false); // Nastavíme isPending na false až po načítaní
+      });
+
       view.map.add(newLayer);
       setActiveLayers((prev) => [...prev, newLayer]);
     }
   };
 
   const toggleTileLayer = (url) => {
+    setIsPending(true); // Pred začiatkom načítania nastavíme isPending na true
     if (!view) return;
 
     const existingLayer = activeLayers.find((layer) => layer.url === url);
@@ -92,8 +103,15 @@ const MyMap = () => {
     if (existingLayer) {
       view.map.remove(existingLayer);
       setActiveLayers((prev) => prev.filter((layer) => layer.url !== url));
+      setIsPending(false); // Ak je vrstva už odstránená, animácia skončí
     } else {
       const tileLayer = new TileLayer({ url });
+
+      // Po načítaní tile layer-u nastavíme isPending na false
+      tileLayer.when(() => {
+        setIsPending(false); // Ak je vrstva načítaná, animácia skončí
+      });
+
       view.map.add(tileLayer);
       setActiveLayers((prev) => [...prev, tileLayer]);
     }
@@ -109,15 +127,20 @@ const MyMap = () => {
         className="absolute left-1/2 -translate-x-[50%]"
         toggleLayer={toggleLayer}
         toggleTileLayer={toggleTileLayer}
-      ></Header>
-      <ZoomButtons view={view}></ZoomButtons>
+      />
+      <ZoomButtons view={view} />
       <div className="absolute bottom-16 lg:bottom-10 right-2 lg:right-6 flex items-center items-stretch gap-0.5">
-        <ScaleSelector view={view}></ScaleSelector>
-        <Printer view={view}></Printer>
-        <HomeButton view={view}></HomeButton>
+        <ScaleSelector view={view} />
+        <Printer view={view} />
+        <HomeButton view={view} />
         <Copyright />
       </div>
       <Logo />
+      {isPending && (
+        <div className="absolute inset-0 flex items-center justify-center h-screen w-full bg-gray-600 bg-opacity-50 z-50">
+          <Loader className="animate-spin text-white text-4xl" />
+        </div>
+      )}
     </div>
   );
 };
